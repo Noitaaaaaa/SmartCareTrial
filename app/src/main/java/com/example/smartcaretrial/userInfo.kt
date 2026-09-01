@@ -13,9 +13,11 @@ data class UserInfo(
     val password: String = "",
     val specialty: String = "",
     val role: String = "Patient",
-    val age: String = "",
+    val Birthdate: String = "",
     val gender: String = "",
     val contactNumber: String = "",
-    val emergencyNumber: String = ""
+    val emergencyNumber: String = "",
+    val securityQuestion: String = "",
+    val securityAnswer: String = ""
 
 )
