@@ -1,19 +1,23 @@
 package com.example.smartcaretrial
 
+import android.graphics.fonts.FontStyle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -44,6 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -95,13 +101,26 @@ fun MainActivityNavigation() {
             ModalDrawerSheet {
                 Box(
                     modifier = Modifier
-                        .background(color = Cream)
                         .fillMaxWidth()
-                        .height(150.dp),
+                        .height(150.dp)
+                        .background(Cream),
                     contentAlignment = Alignment.Center
-
                 ) {
-                    Text(fontSize = (30.sp), text = "SmartCare")
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.splash_iconhdpi),
+                            contentDescription = "SmartCare Logo",
+                            modifier = Modifier.size(90.dp)
+                        )
+
+                        Text(
+                            text = "SmartCare",
+                            fontFamily = FontFamily.Cursive,
+                            fontSize = 30.sp
+                        )
+                    }
                 }
                 Divider()
                 NavigationDrawerItem(
@@ -229,7 +248,7 @@ fun SmartCareTopBar(
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0x80FFFDD0)
+            containerColor = Color(0x80FFDEC48)
         ),
         navigationIcon = {
             IconButton(

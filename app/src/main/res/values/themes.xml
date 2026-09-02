@@ -3,7 +3,7 @@
 
     <style name = "Theme.MySplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/appicon</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_iconhdpi</item>
         <item name="postSplashScreenTheme">@style/Theme.SmartCareTrial</item>
     </style>
 
