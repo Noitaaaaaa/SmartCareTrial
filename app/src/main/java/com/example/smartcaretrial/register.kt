@@ -218,7 +218,7 @@ private fun StepRoleAndBasicInfo(
                     if (input.all { it.isLetter() || it.isWhitespace() })
                         onUserInfoChange(userInfo.copy(firstName = input))
                 },
-                label = { Text("Name") },
+                label = { Text("First Name") },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
@@ -432,7 +432,7 @@ private fun StepSecurityAndAccount(
         OutlinedTextField(
             value = userInfo.securityAnswer,
             onValueChange = { input ->
-                if (input.all { it.isLetter() })
+                if (input.all { it.isLetter() || it.isWhitespace() })
                     onUserInfoChange(userInfo.copy(securityAnswer = input))
             },
             label = { Text("Security Answer") },

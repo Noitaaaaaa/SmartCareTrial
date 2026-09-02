@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -39,12 +40,11 @@ import com.example.smartcaretrial.ui.theme.SmartCareTrialTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SmartCareTrialTheme {
                 MainActivityNavigation()
-            }
         }
     }
 }
@@ -60,7 +60,7 @@ fun MainActivityNavigation() {
         modifier = Modifier.fillMaxSize(),
 
         topBar = {
-            if (currentRoute != "login" && currentRoute != "register") {
+            if (currentRoute != "login" && currentRoute != "register" && currentRoute != "forgot") {
                 SmartCareTopBar(navController = navController, currentRoute = currentRoute)
             }
         }
@@ -85,6 +85,9 @@ fun MainActivityNavigation() {
             ) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getInt("userId") ?: 0
                 PatientDashboard(navController = navController, userId = userId)
+            }
+            composable ("forgot") {
+                Forgot(navController = navController)
             }
         }
     }

@@ -63,9 +63,12 @@ fun Login(navController: NavController) {
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth(),
-            isError = userInfo.email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(userInfo.email).matches(),
+            isError = userInfo.email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(userInfo.email)
+                .matches(),
             supportingText = {
-                if (userInfo.email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(userInfo.email).matches()) {
+                if (userInfo.email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(userInfo.email)
+                        .matches()
+                ) {
                     Text("Please enter a valid email address")
                 }
             },
@@ -88,7 +91,8 @@ fun Login(navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black),
+                unfocusedTextColor = Color.Black
+            ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
@@ -102,38 +106,47 @@ fun Login(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = {
-                coroutineScope.launch {
-                    val db = DatabaseProvider.getDatabase(context)
-                    val savedUser = db.userDao().getUserByEmail(userInfo.email)
+                Button(onClick = {
+                    coroutineScope.launch {
+                        val db = DatabaseProvider.getDatabase(context)
+                        val savedUser = db.userDao().getUserByEmail(userInfo.email)
 
-                    if (savedUser == null) {
-                        loginError = "No account found with that email"
-                    } else if (savedUser.password != userInfo.password) {
-                        loginError = "Incorrect password"
-                    } else {
-                        loginError = null
-                        when (savedUser.role) {
-                            "Doctor" -> navController.navigate("doctorDashboard")
-                            "Patient" -> navController.navigate("patientDashboard/${savedUser.id}")
+                        if (savedUser == null) {
+                            loginError = "No account found with that email"
+                        } else if (savedUser.password != userInfo.password) {
+                            loginError = "Incorrect password"
+                        } else {
+                            loginError = null
+                            when (savedUser.role) {
+                                "Doctor" -> navController.navigate("doctorDashboard")
+                                "Patient" -> navController.navigate("patientDashboard/${savedUser.id}")
+                            }
                         }
                     }
+                }) {
+                    Text("Login")
                 }
-            }) {
-                Text("Login")
-            }
 
-            TextButton(onClick = {
-                navController.navigate("register")
-            }) {
-                Text("Register here")
+                TextButton(onClick = {
+                    navController.navigate("register")
+                }) {
+                    Text("Register here")
+                }
+            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = { navController.navigate("forgot") }) {
+                Text("Forgot Password?")
             }
         }
-    }
-}
+        }
+        }
+
+
