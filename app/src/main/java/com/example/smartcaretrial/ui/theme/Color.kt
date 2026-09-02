@@ -12,4 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val DoctorBlue = Color(0xFF9797FF)
 
-val PatientGreen = Color(0xFFA5EA43)
+val PatientGreen = Color(0xFFA5EA4)
+
+    val Cream = Color(0xFFEFE0D7)
