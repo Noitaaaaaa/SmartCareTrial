@@ -29,9 +29,9 @@ fun PatientDashboard (navController: NavController, userId: Int) {
     Column() {
         Spacer (modifier = Modifier.height(32.dp))
         if (userInfo != null){
-        Text (text = "Welcome ${userInfo!!.firstName} ")
+            Text (text = "Welcome ${userInfo!!.firstName} ")
 
-    } else{
-        Text(text = " Loading......")
+        } else{
+            Text(text = " Loading......")
         }
-}}
+    }}
