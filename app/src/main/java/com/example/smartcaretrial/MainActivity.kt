@@ -142,7 +142,7 @@ fun MainActivityNavigation() {
                         // add those to the NavHost below, then uncomment.
                         when (sessionViewModel.currentUser?.role) {
                             "Doctor" -> { /* TODO: navController.navigate("patientDirectory") */ }
-                            "Patient" -> { /* TODO: navController.navigate("doctorDirectory") */ }
+                            "Patient" -> { navController.navigate("doctorDirectory")}
                         }
                     }
                 )
@@ -209,6 +209,9 @@ fun MainActivityNavigation() {
                 }
                 composable("profile") {
                     Profile(navController = navController, sessionViewModel = sessionViewModel)
+                }
+                composable("doctorDirectory") {
+                    DoctorDirectory(navController = navController, sessionViewModel = sessionViewModel)
                 }
             }
         }
