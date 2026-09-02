@@ -2,6 +2,7 @@ package com.example.smartcaretrial
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -10,9 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
@@ -26,12 +30,16 @@ fun PatientDashboard (navController: NavController, userId: Int) {
         userInfo = db.userDao().getUserById(userId)
     }
 
-    Column() {
-        Spacer (modifier = Modifier.height(32.dp))
-        if (userInfo != null){
-            Text (text = "Welcome ${userInfo!!.firstName} ")
-
-        } else{
-            Text(text = " Loading......")
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
+        if (userInfo != null) {
+            Text(fontSize = (28.sp), text = "Welcome ${userInfo!!.firstName}" )
+        } else {
+            Text(text = "Loading......")
         }
-    }}
+    }
+}
+
