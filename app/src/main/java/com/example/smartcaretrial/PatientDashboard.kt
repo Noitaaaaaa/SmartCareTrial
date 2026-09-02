@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun PatientDashboard(navController: NavController, userId: Int) {
+fun PatientDashboard (navController: NavController, userId: Int) {
+
     var userInfo by remember { mutableStateOf<UserInfo?>(null) }
     val context = LocalContext.current
 
@@ -25,14 +26,12 @@ fun PatientDashboard(navController: NavController, userId: Int) {
         userInfo = db.userDao().getUserById(userId)
     }
 
-    Column {
-        Spacer(modifier = Modifier.height(32.dp))
-        if (userInfo != null) {
-            Text(text = "Good morning ${userInfo!!.firstName}")
-            // now userInfo has EVERYTHING: email, contact number, address, etc.
-            // once you add those fields to UserInfo
-        } else {
-            Text(text = "Loading...")
+    Column() {
+        Spacer (modifier = Modifier.height(32.dp))
+        if (userInfo != null){
+        Text (text = "Welcome ${userInfo!!.firstName} ")
+
+    } else{
+        Text(text = " Loading......")
         }
-    }
-}
+}}
