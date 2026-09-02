@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -74,6 +76,11 @@ fun MainActivityNavigation() {
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    // Created once here, so it's scoped to the Activity rather than any
+    // single screen — every composable below gets the SAME instance,
+    // which is what makes "session" state actually work.
+    val sessionViewModel: SessionViewModel = viewModel()
+
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
@@ -96,6 +103,23 @@ fun MainActivityNavigation() {
                 }
                 Divider()
                 NavigationDrawerItem(
+                    label = { Text(text = "My Profile", color = Color.Black) },
+                    selected = false,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "My Profile",
+                            tint = Color.Black
+                        )
+                    },
+                    onClick = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                        navController.navigate("profile")
+                    }
+                )
+                NavigationDrawerItem(
                     label = { Text(text = "Directory", color = Color.Black) },
                     selected = false,
                     icon = {
@@ -109,13 +133,15 @@ fun MainActivityNavigation() {
                         coroutineScope.launch {
                             drawerState.close()
                         }
-                        // TODO: this needs to know who's currently logged in to
-                        // route Doctor -> patientDirectory / Patient -> doctorDirectory.
-                        // There's no session state yet (nothing tracks the logged-in
-                        // user after Login navigates away), so this is a no-op for now.
-                        // The clean fix is a small session-holding ViewModel scoped to
-                        // this NavHost that Login populates on success and this drawer
-                        // reads from — happy to build that next.
+                        // Now correctly reads who's logged in from the session
+                        // instead of the undefined `savedUser`. Left as a TODO
+                        // navigate because "patientDirectory" / "doctorDirectory"
+                        // don't have composable() destinations registered yet —
+                        // add those to the NavHost below, then uncomment.
+                        when (sessionViewModel.currentUser?.role) {
+                            "Doctor" -> { /* TODO: navController.navigate("patientDirectory") */ }
+                            "Patient" -> { /* TODO: navController.navigate("doctorDirectory") */ }
+                        }
                     }
                 )
                 NavigationDrawerItem(
@@ -132,6 +158,7 @@ fun MainActivityNavigation() {
                         coroutineScope.launch {
                             drawerState.close()
                         }
+                        sessionViewModel.logout()
                         navController.navigate("login") {
                             popUpTo(0)
                         }
@@ -161,7 +188,7 @@ fun MainActivityNavigation() {
                     DoctorDashboard(navController = navController)
                 }
                 composable("login") {
-                    Login(navController = navController)
+                    Login(navController = navController, sessionViewModel = sessionViewModel)
                 }
                 composable("register") {
                     Register(navController = navController)
@@ -175,6 +202,9 @@ fun MainActivityNavigation() {
                 }
                 composable("forgot") {
                     Forgot(navController = navController)
+                }
+                composable("profile") {
+                    Profile(navController = navController, sessionViewModel = sessionViewModel)
                 }
             }
         }
@@ -210,6 +240,7 @@ fun SmartCareTopBar(
                 text = when {
                     currentRoute == "doctorDashboard" -> "Doctor Dashboard"
                     currentRoute?.startsWith("patientDashboard") == true -> "Patient Portal"
+                    currentRoute == "profile" -> "My Profile"
                     else -> "Smart Care"
                 }
             )

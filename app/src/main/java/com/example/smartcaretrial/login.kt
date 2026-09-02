@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 @Composable
 fun Login(
     navController: NavController,
+    sessionViewModel: SessionViewModel,
     viewModel: LoginViewModel = viewModel()
 ) {
     val userInfo = viewModel.userInfo
@@ -103,7 +104,16 @@ fun Login(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(onClick = {
-                viewModel.login { route ->
+                viewModel.login { user ->
+                    // This is the key line for "the app knows who I am":
+                    // store the logged-in user in the shared session...
+                    sessionViewModel.login(user)
+
+                    // ...then route based on their role, same as before.
+                    val route = when (user.role) {
+                        "Doctor" -> "doctorDashboard"
+                        else -> "patientDashboard/${user.id}"
+                    }
                     navController.navigate(route)
                 }
             }) {

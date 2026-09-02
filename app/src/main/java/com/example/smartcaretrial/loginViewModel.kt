@@ -25,10 +25,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Attempts to log in. Calls [onSuccess] with the route to navigate to
-     * ("doctorDashboard" or "patientDashboard/{id}") if the login succeeds.
+     * Attempts to log in. On success, calls [onSuccess] with the full
+     * [UserInfo] row from the database — the caller decides what to do with
+     * it (store it in the session, pick a route, etc).
      */
-    fun login(onSuccess: (route: String) -> Unit) {
+    fun login(onSuccess: (user: UserInfo) -> Unit) {
         viewModelScope.launch {
             val db = DatabaseProvider.getDatabase(getApplication())
             val savedUser = db.userDao().getUserByEmail(userInfo.email)
@@ -38,11 +39,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 savedUser.password != userInfo.password -> loginError = "Incorrect password"
                 else -> {
                     loginError = null
-                    val route = when (savedUser.role) {
-                        "Doctor" -> "doctorDashboard"
-                        else -> "patientDashboard/${savedUser.id}"
-                    }
-                    onSuccess(route)
+                    onSuccess(savedUser)
                 }
             }
         }
