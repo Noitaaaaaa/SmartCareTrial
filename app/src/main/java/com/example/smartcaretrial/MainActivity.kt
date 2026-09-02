@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.horizontalScroll
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -174,7 +176,9 @@ fun MainActivityNavigation() {
                     SmartCareTopBar(
                         currentRoute = currentRoute,
                         drawerState = drawerState,
-                        coroutineScope = coroutineScope
+                        coroutineScope = coroutineScope,
+                        navController = navController,
+                        userId = sessionViewModel.currentUser?.id ?: 0
                     )
                 }
             }
@@ -216,18 +220,22 @@ fun MainActivityNavigation() {
 fun SmartCareTopBar(
     currentRoute: String?,
     drawerState: DrawerState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    navController: NavController,
+    userId: Int
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0x80FFFDD0)
         ),
         navigationIcon = {
-            IconButton(onClick = {
-                coroutineScope.launch {
-                    drawerState.open()
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        drawerState.open()
+                    }
                 }
-            }) {
+            ) {
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = "Open Drawer",
@@ -237,11 +245,9 @@ fun SmartCareTopBar(
         },
         title = {
             Text(
-                text = when {
-                    currentRoute == "doctorDashboard" -> "Doctor Dashboard"
-                    currentRoute?.startsWith("patientDashboard") == true -> "Patient Portal"
-                    currentRoute == "profile" -> "My Profile"
-                    else -> "Smart Care"
+                text = "Smart Care",
+                modifier = Modifier.clickable {
+                    navController.navigate("patientDashboard/$userId")
                 }
             )
         }
