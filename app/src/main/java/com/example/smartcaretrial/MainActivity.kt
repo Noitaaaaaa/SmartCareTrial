@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person3
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -90,15 +92,38 @@ fun MainActivityNavigation() {
                     contentAlignment = Alignment.Center
 
                 ) {
-                    Text(fontSize = (30.sp),text = "SmartCare")
+                    Text(fontSize = (30.sp), text = "SmartCare")
                 }
                 Divider()
+                NavigationDrawerItem(
+                    label = { Text(text = "Directory", color = Color.Black) },
+                    selected = false,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Person3,
+                            contentDescription = "Directory",
+                            tint = Color.Black
+                        )
+                    },
+                    onClick = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                        // TODO: this needs to know who's currently logged in to
+                        // route Doctor -> patientDirectory / Patient -> doctorDirectory.
+                        // There's no session state yet (nothing tracks the logged-in
+                        // user after Login navigates away), so this is a no-op for now.
+                        // The clean fix is a small session-holding ViewModel scoped to
+                        // this NavHost that Login populates on success and this drawer
+                        // reads from — happy to build that next.
+                    }
+                )
                 NavigationDrawerItem(
                     label = { Text(text = "Log-out", color = Color.Black) },
                     selected = false,
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.PowerOff,
+                            imageVector = Icons.Default.Logout,
                             contentDescription = "Log-out",
                             tint = Color.Black
                         )
@@ -118,7 +143,7 @@ fun MainActivityNavigation() {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                if (currentRoute != "login" && currentRoute != "register" && currentRoute != "forgot") {
+                if (!isAuthRoute) {
                     SmartCareTopBar(
                         currentRoute = currentRoute,
                         drawerState = drawerState,

@@ -39,19 +39,16 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,16 +63,14 @@ private fun fieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Register(navController: NavController) {
-    var userInfo by remember { mutableStateOf(UserInfo()) }
-    var registerError by remember { mutableStateOf<String?>(null) }
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    // Doctors get a 4th step (Specialty), Patients only need 3
-    var currentStep by remember { mutableIntStateOf(1) }
-    val totalSteps = if (userInfo.role == "Doctor") 4 else 3
+fun Register(
+    navController: NavController,
+    viewModel: RegisterViewModel = viewModel()
+) {
+    val userInfo = viewModel.userInfo
+    val registerError = viewModel.registerError
+    val currentStep = viewModel.currentStep
+    val totalSteps = viewModel.totalSteps
 
     Column(
         modifier = Modifier
@@ -110,26 +105,26 @@ fun Register(navController: NavController) {
         when (currentStep) {
             1 -> StepRoleAndBasicInfo(
                 userInfo = userInfo,
-                onUserInfoChange = { userInfo = it }
+                onUserInfoChange = viewModel::updateUserInfo
             )
             2 -> StepContactInfo(
                 userInfo = userInfo,
-                onUserInfoChange = { userInfo = it }
+                onUserInfoChange = viewModel::updateUserInfo
             )
             3 -> StepSecurityAndAccount(
                 userInfo = userInfo,
-                onUserInfoChange = { userInfo = it }
+                onUserInfoChange = viewModel::updateUserInfo
             )
             4 -> StepSpecialty(
                 userInfo = userInfo,
-                onUserInfoChange = { userInfo = it }
+                onUserInfoChange = viewModel::updateUserInfo
             )
         }
 
         if (registerError != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = registerError ?: "",
+                text = registerError,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -142,40 +137,17 @@ fun Register(navController: NavController) {
         ) {
             // Back button — hidden on the very first step
             if (currentStep > 1) {
-                OutlinedButton(onClick = { currentStep-- }) {
+                OutlinedButton(onClick = { viewModel.goBack() }) {
                     Text("Back")
                 }
             } else {
                 Spacer(modifier = Modifier.width(1.dp)) // keeps Next aligned right
             }
 
-            if (currentStep < totalSteps) {
-                Button(onClick = {
-                    registerError = validateStep(currentStep, userInfo)
-                    if (registerError == null) currentStep++
-                }) {
-                    Text("Next")
-                }
-            } else {
-                Button(onClick = {
-                    registerError = validateStep(currentStep, userInfo)
-                    if (registerError == null) {
-                        coroutineScope.launch {
-                            val db = DatabaseProvider.getDatabase(context)
-                            val existingUser = db.userDao().getUserByEmail(userInfo.email)
-
-                            if (existingUser != null) {
-                                registerError = "An account with that email already exists"
-                            } else {
-                                registerError = null
-                                db.userDao().insertUser(userInfo)
-                                navController.navigate("login")
-                            }
-                        }
-                    }
-                }) {
-                    Text("Register")
-                }
+            Button(onClick = {
+                viewModel.nextOrSubmit(onSuccess = { navController.navigate("login") })
+            }) {
+                Text(if (currentStep < totalSteps) "Next" else "Register")
             }
         }
 
@@ -184,6 +156,10 @@ fun Register(navController: NavController) {
 }
 
 // ---------- STEP 1: Role, Name, Gender, Age ----------
+// These "show a dropdown / dialog" flags are transient UI state, not app
+// data, so they're kept as local `remember` rather than moved to the
+// ViewModel (a ViewModel surviving rotation would make dialogs re-open
+// after a rotation, which isn't what you want).
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StepRoleAndBasicInfo(
@@ -477,37 +453,6 @@ private fun StepSpecialty(
             modifier = Modifier.fillMaxWidth(),
             colors = fieldColors()
         )
-    }
-}
-
-// ---------- Per-step validation ----------
-// Returns an error message if the step is incomplete, or null if it's OK to move on.
-private fun validateStep(step: Int, userInfo: UserInfo): String? {
-    return when (step) {
-        1 -> when {
-            userInfo.firstName.isBlank() -> "Please enter your first name"
-            userInfo.lastName.isBlank() -> "Please enter your last name"
-            userInfo.gender.isBlank() -> "Please select a gender"
-            userInfo.Birthdate.isBlank() -> "Please select your birth date"
-            else -> null
-        }
-        2 -> when {
-            userInfo.contactNumber.isBlank() -> "Please enter a contact number"
-            userInfo.email.isBlank() -> "Please enter an email"
-            !Patterns.EMAIL_ADDRESS.matcher(userInfo.email).matches() -> "Please enter a valid email address"
-            else -> null
-        }
-        3 -> when {
-            userInfo.securityQuestion.isBlank() -> "Please select a security question"
-            userInfo.securityAnswer.isBlank() -> "Please answer the security question"
-            userInfo.password.isBlank() -> "Please enter a password"
-            else -> null
-        }
-        4 -> when {
-            userInfo.specialty.isBlank() -> "Please enter your specialty"
-            else -> null
-        }
-        else -> null
     }
 }
 

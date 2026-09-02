@@ -13,33 +13,26 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 
 @Composable
-fun Forgot(navController: NavController) {
-    var email by remember { mutableStateOf("") }
-    var securityAnswer by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
-    var securityQuestion by remember { mutableStateOf<String?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isVerified by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+fun Forgot(
+    navController: NavController,
+    viewModel: ForgotPasswordViewModel = viewModel()
+) {
+    val email = viewModel.email
+    val securityAnswer = viewModel.securityAnswer
+    val newPassword = viewModel.newPassword
+    val confirmPassword = viewModel.confirmPassword
+    val securityQuestion = viewModel.securityQuestion
+    val errorMessage = viewModel.errorMessage
+    val isVerified = viewModel.isVerified
 
     Column(
         modifier = Modifier
@@ -53,7 +46,7 @@ fun Forgot(navController: NavController) {
         // Step 1: find account by email
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { viewModel.onEmailChange(it) },
             label = { Text("Email") },
             singleLine = true,
             enabled = !isVerified,
@@ -69,20 +62,7 @@ fun Forgot(navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         if (!isVerified) {
-            Button(onClick = {
-                coroutineScope.launch {
-                    val db = DatabaseProvider.getDatabase(context)
-                    val user = db.userDao().getUserByEmail(email)
-
-                    if (user == null) {
-                        errorMessage = "No account found with that email"
-                        securityQuestion = null
-                    } else {
-                        securityQuestion = user.securityQuestion
-                        errorMessage = null
-                    }
-                }
-            }) {
+            Button(onClick = { viewModel.findAccount() }) {
                 Text("Find Account")
             }
         }
@@ -96,7 +76,7 @@ fun Forgot(navController: NavController) {
 
             OutlinedTextField(
                 value = securityAnswer,
-                onValueChange = { securityAnswer = it },
+                onValueChange = { viewModel.onSecurityAnswerChange(it) },
                 label = { Text("Security Answer") },
                 singleLine = true,
                 enabled = !isVerified,
@@ -111,19 +91,7 @@ fun Forgot(navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             if (!isVerified) {
-                Button(onClick = {
-                    coroutineScope.launch {
-                        val db = DatabaseProvider.getDatabase(context)
-                        val user = db.userDao().getUserByEmail(email)
-
-                        if (user != null && user.securityAnswer.equals(securityAnswer, ignoreCase = true)) {
-                            isVerified = true
-                            errorMessage = null
-                        } else {
-                            errorMessage = "Incorrect answer"
-                        }
-                    }
-                }) {
+                Button(onClick = { viewModel.verifyAnswer() }) {
                     Text("Verify Answer")
                 }
             }
@@ -135,7 +103,7 @@ fun Forgot(navController: NavController) {
 
             OutlinedTextField(
                 value = newPassword,
-                onValueChange = { newPassword = it },
+                onValueChange = { viewModel.onNewPasswordChange(it) },
                 label = { Text("New Password") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
@@ -152,7 +120,7 @@ fun Forgot(navController: NavController) {
 
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = { viewModel.onConfirmPasswordChange(it) },
                 label = { Text("Confirm Password") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
@@ -168,20 +136,9 @@ fun Forgot(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                if (newPassword.isEmpty()) {
-                    errorMessage = "Password cannot be empty"
-                } else if (newPassword != confirmPassword) {
-                    errorMessage = "Passwords do not match"
-                } else {
-                    coroutineScope.launch {
-                        val db = DatabaseProvider.getDatabase(context)
-                        val user = db.userDao().getUserByEmail(email)
-                        if (user != null) {
-                            db.userDao().updateUser(user.copy(password = newPassword))
-                            navController.navigate("login") {
-                                popUpTo("login") { inclusive = true }
-                            }
-                        }
+                viewModel.resetPassword {
+                    navController.navigate("login") {
+                        popUpTo("login") { inclusive = true }
                     }
                 }
             }) {
