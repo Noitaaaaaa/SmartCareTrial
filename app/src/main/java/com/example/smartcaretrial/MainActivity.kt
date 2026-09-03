@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person3
+import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -267,12 +268,35 @@ fun SmartCareTopBar(
             }
         },
         title = {
-            Text(
-                text = "Smart Care",
-                modifier = Modifier.clickable {
-                    navController.navigate("patientDashboard/$userId")
-                }
+            Image(
+                painter = painterResource(id = R.drawable.splash_iconhdpi),
+                contentDescription = "SmartCare Logo",
+                modifier = Modifier.size(54.dp).clickable(
+                    onClick = {navController.navigate("patientDashboard/$userId")}
+                )
             )
+
+        },
+
+        actions = {
+            IconButton(
+                onClick = {
+                    navController.navigate("Profile")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PersonOutline,
+                    contentDescription = "Profile",
+                    tint = Color.Black
+                )
+            }
+
         }
+
+
+
+
+
+
     )
 }
