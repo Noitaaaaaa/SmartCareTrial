@@ -62,6 +62,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.smartcaretrial.UserDao
 import com.example.smartcaretrial.ui.theme.Cream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -230,7 +231,7 @@ fun MainActivityNavigation() {
                     Profile(navController = navController, sessionViewModel = sessionViewModel)
                 }
                 composable("doctorDirectory") {
-                    DoctorDirectory(navController = navController, sessionViewModel = sessionViewModel)
+                    DoctorDirectoryScreen(navController = navController, sessionViewModel = sessionViewModel, viewModel = viewModel())
                 }
             }
         }

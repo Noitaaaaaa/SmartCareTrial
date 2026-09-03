@@ -4,6 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
+
+
+data class doctorDirectory (
+    val id: Int,
+    val firstName: String,
+    val lastName: String,
+    val specialty: String,
+    val email: String,
+)
 
 @Dao
 interface UserDao {
@@ -19,4 +29,18 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
     suspend fun getUserById(id: Int): UserInfo?
+
+    @Query("""
+        SELECT id, firstName, lastName, specialty, email 
+        FROM users 
+        WHERE role = 'Doctor'
+    """)
+    fun getDoctorDirectory(): Flow<List<doctorDirectory>>
 }
+
+
+
+
+
+
+
